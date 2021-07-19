@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { Client, Location } = require('whatsapp-web.js');
+const { Client, Location, MessageMedia } = require('whatsapp-web.js');
 const socketIo = require('socket.io');
 const express = require('express');
 const { body, validationResult } = require('express-validator');
@@ -117,6 +117,28 @@ app.post('/send-message', [body('number').notEmpty(), body('message').notEmpty()
 
   client
     .sendMessage(number, message)
+    .then((response) => {
+      res.status(200).json({
+        status: true,
+        response: response,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        status: false,
+        response: err,
+      });
+    });
+});
+
+// Mengirim media
+app.post('/send-media', (req, res) => {
+  const number = phoneNumberFormatter(req.body.number); //memformat number
+  const caption = req.body.caption;
+  const media = MessageMedia.fromFilePath('./icon.png');
+
+  client
+    .sendMessage(number, media, { caption: caption })
     .then((response) => {
       res.status(200).json({
         status: true,
